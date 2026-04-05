@@ -6,7 +6,7 @@ exports.createRecord = async (req , res) => {
         res.json(record);
     } catch (err) {
         res.status(400).json({
-            error : err.errors?.amount?.message || "Invalid input"
+            error : err.message
         });
     }
 };
@@ -33,18 +33,21 @@ exports.getRecords = async (req , res) => {
         const skip = (page - 1) * limit;
 
         const records = await Record.find(filter)
+            .sort({ date : -1 })
             .skip(skip)
             .limit(limit);
 
+        const total = await Record.countDocuments(filter);
 
         res.json({
             page,
             limit,
+            total,
             count : records.length,
             data : records
         });
 
-    } catch (error) {
+    } catch (err) {
         res.status(400).json({ error : err.message })
     }
 };
@@ -59,7 +62,7 @@ exports.getSummary = async (req , res) => {
     records.forEach(r => {
         // income / expense
         if(r.type === "income") income += r.amount;
-        else expense += r.amount;
+        else if (r.type === "expense") expense += r.amount;
 
          // category-wise total
         if(!categoryTotals[r.category]){
@@ -90,6 +93,8 @@ exports.getSummary = async (req , res) => {
 // UPDATE RECORD (Admin only)
 exports.updateRecord = async (req , res) => {
     try {
+        delete req.body._id;
+
         const record = await Record.findByIdAndUpdate(
             req.params.id,
             req.body,

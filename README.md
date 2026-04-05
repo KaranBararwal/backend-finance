@@ -119,7 +119,7 @@ role: admin
   "amount": 5000,
   "type": "income",
   "category": "salary",
-  "date": "2026-04-04",
+  "date": "2026-04-04", 
   "notes": "salary"
 }
 ```

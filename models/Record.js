@@ -1,15 +1,31 @@
 const mongoose = require("mongoose")
 
 const recordSchema = new mongoose.Schema({
-    amount : Number,
+    amount : {
+        type : Number,
+        required : [true , "Amount is required"]
+    },
+    
     type : {
         type : String,
-        enum : ["income" , "expense"]
+        enum : ["income" , "expense"],
+        required : [true , "Type is required"]
     },
 
-    category : String,
-    date : Date,
-    notes: String
+    category : {
+        type : String,
+        required : [true, "Category is required"]
+    },
+
+    date : {
+        type : Date,
+        required : [true , "Date is required"]
+    },
+
+    notes: {
+        type : String,
+        default : ""
+    }
 });
 
 module.exports = mongoose.model("Record" , recordSchema);
