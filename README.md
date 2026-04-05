@@ -1,36 +1,18 @@
-# 📊 Finance Data Processing & Access Control Backend
+# 📊 Finance Data Processing Backend
 
-## 🚀 Overview
+## 📌 Overview
 
-This project is a backend system for managing financial records with role-based access control. It allows different types of users to interact with financial data based on their permissions and provides summary analytics for dashboard usage.
+This project is a backend system for managing financial records with role-based access control. It allows users to create, view, update, and delete financial data while enforcing permissions based on user roles.
 
-The system is designed with a focus on clean architecture, proper data handling, and clear API structure.
-
----
-
-## 🛠️ Tech Stack
-
-* **Node.js**
-* **Express.js**
-* **MongoDB** with Mongoose
-* REST API architecture
+The system is designed to demonstrate backend architecture, API design, data handling, and access control logic.
 
 ---
 
-## 📁 Project Structure
+## 🚀 Tech Stack
 
-```
-finance-backend/
-│
-├── controllers/     # Business logic
-├── models/          # Database schemas
-├── routes/          # API routes
-├── middleware/      # Access control
-├── config/          # DB config
-│
-├── server.js        # Entry point
-├── .env             # Environment variables
-```
+* Node.js
+* Express.js
+* MongoDB (Mongoose)
 
 ---
 
@@ -38,34 +20,32 @@ finance-backend/
 
 ### 1. Clone the repository
 
-```
-git clone <your-repo-link>
+```bash
+git clone https://github.com/KaranBararwal/backend-finance.git
 cd finance-backend
 ```
 
 ### 2. Install dependencies
 
-```
+```bash
 npm install
 ```
 
-### 3. Configure environment variables
+### 3. Create `.env` file
 
-Create a `.env` file:
-
-```
+```env
 MONGO_URI=your_mongodb_connection_string
 ```
 
 ### 4. Run the server
 
-```
+```bash
 npm start
 ```
 
 Server runs on:
 
-```
+```bash
 http://localhost:5000
 ```
 
@@ -73,119 +53,181 @@ http://localhost:5000
 
 ## 👤 User & Role Management
 
-The system supports three roles:
+### Roles
 
-| Role    | Permissions                |
-| ------- | -------------------------- |
-| Viewer  | View records only          |
-| Analyst | View records + summary     |
-| Admin   | Full access (CRUD + users) |
-
-### Features:
-
-* Create users
-* Assign roles
-* Update role and active status
+* **Viewer** → Can only view records
+* **Analyst** → Can view records and access summary
+* **Admin** → Full access (create, update, delete)
 
 ---
 
-## 💰 Financial Records APIs
+### ➤ Create User
 
-### Create Record
+**POST /api/users**
 
+```json
+{
+  "name": "Admin",
+  "email": "admin@test.com",
+  "role": "admin"
+}
 ```
-POST /api/records
-```
-
-(Admin only)
-
-### Get Records (with filtering & pagination)
-
-```
-GET /api/records
-```
-
-Query Params:
-
-* `type` (income/expense)
-* `category`
-* `date`
-* `page`
-* `limit`
 
 ---
 
-### Update Record
+### ➤ Get Users
+
+**GET /api/users**
+
+---
+
+### ➤ Update User
+
+**PUT /api/users/:id**
+
+```json
+{
+  "role": "analyst",
+  "active": true
+}
+```
+
+---
+
+## 💰 Financial Records API
+
+### 🔹 Base URL
 
 ```
-PUT /api/records/:id
+/api/records
 ```
 
-### Delete Record
+---
+
+### ➤ Create Record (Admin)
+
+**POST /api/records**
+
+Headers:
 
 ```
-DELETE /api/records/:id
+role: admin
 ```
+
+```json
+{
+  "amount": 5000,
+  "type": "income",
+  "category": "salary",
+  "date": "2026-04-04",
+  "notes": "salary"
+}
+```
+
+---
+
+### ➤ Get Records (All Roles)
+
+**GET /api/records**
+
+Supports filtering & pagination:
+
+Examples:
+
+```
+/api/records?type=income
+/api/records?category=salary&page=1&limit=5
+```
+
+---
+
+### ➤ Update Record (Admin)
+
+**PUT /api/records/:id**
+
+```json
+{
+  "amount": 6000
+}
+```
+
+---
+
+### ➤ Delete Record (Admin)
+
+**DELETE /api/records/:id**
 
 ---
 
 ## 📊 Dashboard Summary API
 
-### Get Summary
+### ➤ Get Summary
 
+**GET /api/records/summary**
+
+Access:
+
+* Admin
+* Analyst
+
+### Response:
+
+```json
+{
+  "totalIncome": 5000,
+  "totalExpense": 2000,
+  "netBalance": 3000,
+  "categoryTotals": {
+    "salary": 5000,
+    "shopping": 2000
+  },
+  "recentActivity": []
+}
 ```
-GET /api/records/summary
-```
-
-Returns:
-
-* Total income
-* Total expenses
-* Net balance
-* Category-wise totals
-* Recent activity
 
 ---
 
 ## 🔐 Access Control
 
-Role-based access control is implemented using middleware.
+Role-based access is implemented using middleware.
 
-* Viewer: Read-only access
-* Analyst: Read + summary
-* Admin: Full access
-
-Unauthorized actions return:
-
-```
-403 - Access Denied
-```
+| Action        | Viewer | Analyst | Admin |
+| ------------- | ------ | ------- | ----- |
+| View Records  | ✅      | ✅       | ✅     |
+| Create Record | ❌      | ❌       | ✅     |
+| Update Record | ❌      | ❌       | ✅     |
+| Delete Record | ❌      | ❌       | ✅     |
+| Summary       | ❌      | ✅       | ✅     |
 
 ---
 
 ## ⚠️ Validation & Error Handling
 
-* Schema-based validation using Mongoose
-* Proper HTTP status codes used:
+* Schema validation using Mongoose
+* Proper HTTP status codes
+* Structured error responses
 
-  * `400` → Bad request
-  * `403` → Unauthorized
-  * `404` → Not found
-* Clear error messages returned for invalid input
+### Example Error:
+
+```json
+{
+  "error": "Record validation failed"
+}
+```
 
 ---
 
 ## 💾 Data Persistence
 
-* MongoDB used as a document database
-* Data stored persistently
-* Mongoose used for schema modeling
+* MongoDB used as database
+* Data stored using Mongoose schemas
+* Persistent across server restarts
 
 ---
 
 ## ✨ Additional Features
 
-* Pagination for record listing
+* Pagination for records
 * Filtering by type, category, and date
 * Clean and modular code structure
 
@@ -194,24 +236,20 @@ Unauthorized actions return:
 ## 🧠 Assumptions
 
 * Authentication is mocked using request headers (`role`)
-* Focus is on backend logic and API design
-* No frontend included
+* No password-based login implemented
+* Focus is on backend logic and structure
 
 ---
 
-## 📌 Conclusion
+## 🎯 Conclusion
 
-This backend demonstrates:
+This project demonstrates:
 
-* Clean API design
+* Clean backend architecture
 * Role-based access control
-* Data aggregation for dashboards
-* Proper validation and error handling
+* CRUD operations with validation
+* Aggregated dashboard APIs
 
----
-
-## 🙌 Author
-
-Karan
+The system is designed to be simple, clear, and maintainable while fulfilling all assignment requirements.
 
 ---
